@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHIEU THU K58</title>
+    <!-- Add Libraries -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f4f6;
+            margin: 0;
+            padding: 10px;
+        }
+
+        .k58 {
+            width: 384px;
+            background: #fff;
+            padding: 10px;
+            font-size: 13px;
+            line-height: 1.3;
+            color: #000;
+            margin: 0 auto;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .right {
+            text-align: right;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        .uppercase {
+            text-transform: uppercase;
+        }
+
+        .divider {
+            border-top: 1px solid #000;
+            margin: 8px 0;
+        }
+
+        .dashed-divider {
+            border-top: 1px dashed #000;
+            margin: 8px 0;
+        }
+
+        /* Layout using tables instead of flex */
+        .full-width {
+            width: 100%;
+        }
+
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .header-table td {
+            vertical-align: top;
+            padding: 0;
+            border: none;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+        }
+
+        .data-table th,
+        .data-table td {
+            border: 1px solid #000;
+            padding: 4px 2px;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        .info-row {
+            margin-bottom: 2px;
+        }
+
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .summary-table td {
+            padding: 2px 0;
+            border: none;
+        }
+
+        .signature {
+            margin-top: 20px;
+            margin-bottom: 40px;
+        }
+
+        /* Print styles */
+        @media print {
+            @page {
+                margin: 0;
+            }
+
+            body {
+                background: #fff;
+                padding: 0;
+                margin: 0;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .k58 {
+                width: 100%;
+                max-width: 384px;
+                margin: 0;
+                padding: 8px;
+            }
+        }
+
+        .no-print {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="capture" class="k58">
+        <!-- Header -->
+        <table class="header-table">
+            <tr>
+                <td style="width: 70%;">
+                    <div class="bold uppercase js-store-name"></div>
+                    <div class="bold uppercase js-store-branch"></div>
+                    <div style="font-size: 11px;">
+                        Đ/C: <span class="js-store-address"></span><br />
+                        MST: <span class="js-store-tax-code"></span><br />
+                        SĐT: <span class="js-store-phone"></span>
+                    </div>
+                </td>
+                <td class="right" style="width: 30%; vertical-align: top;">
+                    Số: <span class="js-receipt-number"></span>
+                </td>
+            </tr>
+        </table>
+
+        <div class="divider"></div>
+
+        <div class="center">
+            <div class="bold uppercase js-receipt-title" style="font-size: 16px;"></div>
+            <div class="js-receipt-subtitle"></div>
+            <div style="font-style: italic;" class="js-receipt-date"></div>
+            <div style="font-style: italic;" class="js-receipt-period"></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Customer Info -->
+        <div class="info-row"><span class="bold">Khách hàng:</span> <span class="js-cust-name"></span></div>
+        <div class="info-row"><span>Mã khách hàng:</span> <span class="js-cust-code"></span></div>
+
+        <table class="full-width">
+            <tr>
+                <td style="width: 50%;">MST khách hàng: <span class="js-cust-tax"></span></td>
+                <td class="right">Số công tơ: <span class="js-meter-number"></span></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td class="right">Số hộ: <span class="js-household-count"></span></td>
+            </tr>
+        </table>
+
+        <div class="info-row">
+            <span class="bold">Địa chỉ:</span> <span class="js-cust-address"></span>
+        </div>
+
+        <!-- Main Product Table -->
+        <table class="data-table js-items-table">
+            <thead>
+                <tr>
+                    <th>Chỉ số mới</th>
+                    <th>Chỉ số cũ</th>
+                    <th>HSN</th>
+                    <th>Điện năng (kWh)</th>
+                    <th>Đơn giá (VNĐ)</th>
+                    <th>Thành tiền (VNĐ)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows will be injected here -->
+            </tbody>
+        </table>
+
+        <!-- Calculation Summary -->
+        <table class="summary-table">
+            <tr>
+                <td style="width: 40%;">Sản lượng:</td>
+                <td class="right js-summary-usage"></td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <div class="divider"></div>
+                </td>
+            </tr>
+            <tr>
+                <td>Thuế suất GTGT:</td>
+                <td class="right js-summary-tax-rate"></td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <div class="divider"></div>
+                </td>
+            </tr>
+            <tr>
+                <td>Cộng tiền điện:</td>
+                <td class="right js-summary-subtotal"></td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <div class="divider"></div>
+                </td>
+            </tr>
+            <tr>
+                <td>Tiền thuế GTGT:</td>
+                <td class="right js-summary-tax-amount"></td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <div class="divider" style="border-top: 2px solid #000;"></div>
+                </td>
+            </tr>
+            <tr class="bold">
+                <td>Tổng tiền thanh toán:</td>
+                <td class="right js-summary-total"></td>
+            </tr>
+        </table>
+
+        <div class="dashed-divider"></div>
+
+        <div style="font-style: italic; margin-bottom: 10px;">
+            Bằng chữ: <span class="js-total-in-words"></span>
+        </div>
+
+        <div class="center signature">
+            <div class="bold">Người thu tiền</div>
+            <div style="font-style: italic;">(Ký, ghi rõ họ tên)</div>
+        </div>
+
+        <div class="center">
+            ------------------------------------------
+        </div>
+    </div>
+
+    <div class="no-print">
+        <button onclick="printToFlutter()" id="btn-print">In Hóa Đơn (Bluetooth ESC/POS)</button>
+    </div>
+
+    <script>
+        /**
+         * Robust function to remove Vietnamese accents
+         */
+        function removeAccents(str) {
+            if (!str) return '';
+            str = str.replace(/A|Á|À|Ả|Ã|Ạ|Â|Ấ|Ầ|Ẩ|Ẫ|Ậ|Ă|Ắ|Ằ|Ẳ|Ẵ|Ặ/g, "A");
+            str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+            str = str.replace(/E|É|È|Ẻ|Ẽ|Ẹ|Ê|Ế|Ề|Ể|Ễ|Ệ/g, "E");
+            str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+            str = str.replace(/I|Í|Ì|Ỉ|Ĩ|Ị/g, "I");
+            str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+            str = str.replace(/O|Ó|À|Ỏ|Õ|Ọ|Ô|Ố|Ồ|Ổ|Ỗ|Ộ|Ơ|Ớ|Ờ|Ở|Ỡ|Ợ/g, "O");
+            str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+            str = str.replace(/U|Ú|Ù|Ủ|Ũ|Ụ|Ư|Ứ|Ừ|Ử|Ữ|Ự/g, "U");
+            str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+            str = str.replace(/Y|Ý|Ỳ|Ỷ|Ỹ|Ị/g, "Y");
+            str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+            str = str.replace(/Đ/g, "D");
+            str = str.replace(/đ/g, "d");
+            // Some scanners/printers might struggle with specific Unicode combinations, 
+            // Normalize just in case
+            return str.normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D");
+        }
+
+        const formatMoney = (n) => (n || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+        /**
+         * Sample Object with Accented Vietnamese
+         */
+        const receiptData = {
+            store: {
+                name: "CÔNG TY TNHH TM",
+                branch: "THÀNH THẢO",
+                address: "Thị Tứ - Xã Hưng Đạo - TP Hà Nội",
+                taxCode: "0104052926",
+                phone: "0975152132"
+            },
+            receipt: {
+                number: "234975",
+                title: "PHIẾU THU TIỀN ĐIỆN",
+                subtitle: "(Liên 2: Giao khách hàng)",
+                date: "Ngày 31 tháng 03 năm 2026",
+                period: "Từ ngày 01/03/2026 đến ngày 31/03/2026"
+            },
+            customer: {
+                name: "Đỗ Thị Thảo",
+                code: "TH1.208",
+                taxCode: "",
+                meterNumber: "",
+                householdCount: "1",
+                address: "Thị Ngoại, Thôn 4, Xã Hưng Đạo, TP Hà Nội"
+            },
+            items: [
+                { newVal: "2.958", oldVal: "2.844", hsn: "1", kwh: "50", price: "1.984", amount: 99200 },
+                { newVal: "", oldVal: "", hsn: "", kwh: "50", price: "2.050", amount: 102500 },
+                { newVal: "", oldVal: "", hsn: "", kwh: "14", price: "2.380", amount: 33320 }
+            ],
+            summary: {
+                usage: "114 kWh",
+                taxRate: "8%",
+                subtotal: 235020,
+                taxAmount: 18802,
+                total: 253822,
+                totalInWords: "Hai trăm năm mươi ba nghìn tám trăm hai mươi hai đồng."
+            }
+        };
+
+        /**
+         * Render function
+         */
+        function renderReceipt(data) {
+            // Header
+            $('.js-store-name').text(data.store.name);
+            $('.js-store-branch').text(data.store.branch);
+            $('.js-store-address').text(data.store.address);
+            $('.js-store-tax-code').text(data.store.taxCode);
+            $('.js-store-phone').text(data.store.phone);
+            $('.js-receipt-number').text(data.receipt.number);
+
+            // Title section
+            $('.js-receipt-title').text(data.receipt.title);
+            $('.js-receipt-subtitle').text(data.receipt.subtitle);
+            $('.js-receipt-date').text(data.receipt.date);
+            $('.js-receipt-period').text(data.receipt.period);
+
+            // Customer
+            $('.js-cust-name').text(data.customer.name);
+            $('.js-cust-code').text(data.customer.code);
+            $('.js-cust-tax').text(data.customer.taxCode);
+            $('.js-meter-number').text(data.customer.meterNumber);
+            $('.js-household-count').text(data.customer.householdCount);
+            $('.js-cust-address').text(data.customer.address);
+
+            // Table
+            const $tbody = $('.js-items-table tbody');
+            $tbody.empty();
+            data.items.forEach(item => {
+                const row = `<tr>
+                    <td>${item.newVal}</td>
+                    <td>${item.oldVal}</td>
+                    <td>${item.hsn}</td>
+                    <td>${item.kwh}</td>
+                    <td>${item.price}</td>
+                    <td class="right">${formatMoney(item.amount)}</td>
+                </tr>`;
+                $tbody.append(row);
+            });
+
+            // Summary
+            $('.js-summary-usage').text(data.summary.usage);
+            $('.js-summary-tax-rate').text(data.summary.taxRate);
+            $('.js-summary-subtotal').text(formatMoney(data.summary.subtotal));
+            $('.js-summary-tax-amount').text(formatMoney(data.summary.taxAmount));
+            $('.js-summary-total').text(formatMoney(data.summary.total));
+            $('.js-total-in-words').text(data.summary.totalInWords);
+        }
+
+        async function printToFlutter() {
+            try {
+                const btn = document.getElementById('btn-print');
+                const captureDiv = document.getElementById('capture');
+
+                // Disable button to prevent multiple clicks
+                const originalText = btn.innerText;
+                btn.innerText = "Đang xử lý in...";
+                btn.disabled = true;
+
+                // Yield to browser to repaint the button text
+                await new Promise(r => setTimeout(r, 200));
+
+                // Ensure background is pure white before capture
+                const originalBg = captureDiv.style.backgroundColor;
+                captureDiv.style.backgroundColor = '#ffffff';
+
+                const canvas = await html2canvas(captureDiv, {
+                    scale: 2, // High resolution
+                    useCORS: true,
+                    logging: false,
+                    backgroundColor: "#ffffff"
+                });
+
+                captureDiv.style.backgroundColor = originalBg;
+
+                // Remove 'data:image/png;base64,' prefix
+                const base64Image = canvas.toDataURL("image/png").split(',')[1];
+
+                if (window.flutter_inappwebview != null) {
+                    window.flutter_inappwebview.callHandler('print', base64Image);
+                } else {
+                    // Chạy phương án dự phòng (fallback) nếu người dùng mở bằng Chrome / Safari
+                    window.print();
+                }
+
+                // Restore button
+                btn.innerText = originalText;
+                btn.disabled = false;
+            } catch (err) {
+                console.error("Lỗi khi tạo ảnh in:", err);
+                alert("Không thể tạo dữ liệu in: " + err.message);
+                const btn = document.getElementById('btn-print');
+                if (btn) {
+                    btn.innerText = "In Hóa Đơn (Bluetooth ESC/POS)";
+                    btn.disabled = false;
+                }
+            }
+        }
+
+        $(document).ready(function () {
+            renderReceipt(receiptData);
+        });
+    </script>
+</body>
+
+</html>
