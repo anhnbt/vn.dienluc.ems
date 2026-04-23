@@ -428,7 +428,8 @@
                 if (window.flutter_inappwebview != null) {
                     window.flutter_inappwebview.callHandler('print', base64Image);
                 } else {
-                    alert("Tính năng in Bluetooth trực tiếp chỉ hoạt động trên App Mobile!");
+                    // Chạy phương án dự phòng (fallback) nếu người dùng mở bằng Chrome / Safari
+                    window.print();
                 }
 
                 // Restore button
