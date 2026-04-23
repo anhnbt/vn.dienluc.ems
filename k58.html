@@ -156,13 +156,13 @@
                     <div class="bold uppercase js-store-name"></div>
                     <div class="bold uppercase js-store-branch"></div>
                     <div style="font-size: 11px;">
-                        D/C: <span class="js-store-address"></span><br />
+                        Đ/C: <span class="js-store-address"></span><br />
                         MST: <span class="js-store-tax-code"></span><br />
-                        SDT: <span class="js-store-phone"></span>
+                        SĐT: <span class="js-store-phone"></span>
                     </div>
                 </td>
                 <td class="right" style="width: 30%; vertical-align: top;">
-                    So: <span class="js-receipt-number"></span>
+                    Số: <span class="js-receipt-number"></span>
                 </td>
             </tr>
         </table>
@@ -179,34 +179,34 @@
         <div class="divider"></div>
 
         <!-- Customer Info -->
-        <div class="info-row"><span class="bold">Khach hang:</span> <span class="js-cust-name"></span></div>
-        <div class="info-row"><span>Ma khach hang:</span> <span class="js-cust-code"></span></div>
+        <div class="info-row"><span class="bold">Khách hàng:</span> <span class="js-cust-name"></span></div>
+        <div class="info-row"><span>Mã khách hàng:</span> <span class="js-cust-code"></span></div>
 
         <table class="full-width">
             <tr>
-                <td style="width: 50%;">MST khach hang: <span class="js-cust-tax"></span></td>
-                <td class="right">So cong to: <span class="js-meter-number"></span></td>
+                <td style="width: 50%;">MST khách hàng: <span class="js-cust-tax"></span></td>
+                <td class="right">Số công tơ: <span class="js-meter-number"></span></td>
             </tr>
             <tr>
                 <td></td>
-                <td class="right">So ho: <span class="js-household-count"></span></td>
+                <td class="right">Số hộ: <span class="js-household-count"></span></td>
             </tr>
         </table>
 
         <div class="info-row">
-            <span class="bold">Dia chi:</span> <span class="js-cust-address"></span>
+            <span class="bold">Địa chỉ:</span> <span class="js-cust-address"></span>
         </div>
 
         <!-- Main Product Table -->
         <table class="data-table js-items-table">
             <thead>
                 <tr>
-                    <th>Chi so moi</th>
-                    <th>Chi so cu</th>
+                    <th>Chỉ số mới</th>
+                    <th>Chỉ số cũ</th>
                     <th>HSN</th>
-                    <th>Dien nang (kWh)</th>
-                    <th>Don gia (vnd)</th>
-                    <th>Thanh tien (vnd)</th>
+                    <th>Điện năng (kWh)</th>
+                    <th>Đơn giá (VNĐ)</th>
+                    <th>Thành tiền (VNĐ)</th>
                 </tr>
             </thead>
             <tbody>
@@ -217,7 +217,7 @@
         <!-- Calculation Summary -->
         <table class="summary-table">
             <tr>
-                <td style="width: 40%;">San luong:</td>
+                <td style="width: 40%;">Sản lượng:</td>
                 <td class="right js-summary-usage"></td>
             </tr>
             <tr>
@@ -226,7 +226,7 @@
                 </td>
             </tr>
             <tr>
-                <td>Thue suat GTGT:</td>
+                <td>Thuế suất GTGT:</td>
                 <td class="right js-summary-tax-rate"></td>
             </tr>
             <tr>
@@ -235,7 +235,7 @@
                 </td>
             </tr>
             <tr>
-                <td>Cong tien dien:</td>
+                <td>Cộng tiền điện:</td>
                 <td class="right js-summary-subtotal"></td>
             </tr>
             <tr>
@@ -244,7 +244,7 @@
                 </td>
             </tr>
             <tr>
-                <td>Tien thue GTGT:</td>
+                <td>Tiền thuế GTGT:</td>
                 <td class="right js-summary-tax-amount"></td>
             </tr>
             <tr>
@@ -253,7 +253,7 @@
                 </td>
             </tr>
             <tr class="bold">
-                <td>Tong tien thanh toan:</td>
+                <td>Tổng tiền thanh toán:</td>
                 <td class="right js-summary-total"></td>
             </tr>
         </table>
@@ -261,12 +261,12 @@
         <div class="dashed-divider"></div>
 
         <div style="font-style: italic; margin-bottom: 10px;">
-            Bang chu: <span class="js-total-in-words"></span>
+            Bằng chữ: <span class="js-total-in-words"></span>
         </div>
 
         <div class="center signature">
-            <div class="bold">Nguoi thu tien</div>
-            <div style="font-style: italic;">(Ky, ghi ro ho ten)</div>
+            <div class="bold">Người thu tiền</div>
+            <div style="font-style: italic;">(Ký, ghi rõ họ tên)</div>
         </div>
 
         <div class="center">
@@ -275,7 +275,7 @@
     </div>
 
     <div class="no-print">
-        <button onclick="printToFlutter()" id="btn-print">In Hoa Don (Bluetooth ESC/POS)</button>
+        <button onclick="printToFlutter()" id="btn-print">In Hóa Đơn (Bluetooth ESC/POS)</button>
     </div>
 
     <script>
@@ -351,26 +351,26 @@
          */
         function renderReceipt(data) {
             // Header
-            $('.js-store-name').text(removeAccents(data.store.name));
-            $('.js-store-branch').text(removeAccents(data.store.branch));
-            $('.js-store-address').text(removeAccents(data.store.address));
+            $('.js-store-name').text(data.store.name);
+            $('.js-store-branch').text(data.store.branch);
+            $('.js-store-address').text(data.store.address);
             $('.js-store-tax-code').text(data.store.taxCode);
             $('.js-store-phone').text(data.store.phone);
             $('.js-receipt-number').text(data.receipt.number);
 
             // Title section
-            $('.js-receipt-title').text(removeAccents(data.receipt.title));
-            $('.js-receipt-subtitle').text(removeAccents(data.receipt.subtitle));
-            $('.js-receipt-date').text(removeAccents(data.receipt.date));
-            $('.js-receipt-period').text(removeAccents(data.receipt.period));
+            $('.js-receipt-title').text(data.receipt.title);
+            $('.js-receipt-subtitle').text(data.receipt.subtitle);
+            $('.js-receipt-date').text(data.receipt.date);
+            $('.js-receipt-period').text(data.receipt.period);
 
             // Customer
-            $('.js-cust-name').text(removeAccents(data.customer.name));
+            $('.js-cust-name').text(data.customer.name);
             $('.js-cust-code').text(data.customer.code);
             $('.js-cust-tax').text(data.customer.taxCode);
             $('.js-meter-number').text(data.customer.meterNumber);
             $('.js-household-count').text(data.customer.householdCount);
-            $('.js-cust-address').text(removeAccents(data.customer.address));
+            $('.js-cust-address').text(data.customer.address);
 
             // Table
             const $tbody = $('.js-items-table tbody');
@@ -393,7 +393,7 @@
             $('.js-summary-subtotal').text(formatMoney(data.summary.subtotal));
             $('.js-summary-tax-amount').text(formatMoney(data.summary.taxAmount));
             $('.js-summary-total').text(formatMoney(data.summary.total));
-            $('.js-total-in-words').text(removeAccents(data.summary.totalInWords));
+            $('.js-total-in-words').text(data.summary.totalInWords);
         }
 
         async function printToFlutter() {
@@ -440,7 +440,7 @@
                 alert("Không thể tạo dữ liệu in: " + err.message);
                 const btn = document.getElementById('btn-print');
                 if (btn) {
-                    btn.innerText = "In Hoa Don (Bluetooth ESC/POS)";
+                    btn.innerText = "In Hóa Đơn (Bluetooth ESC/POS)";
                     btn.disabled = false;
                 }
             }
