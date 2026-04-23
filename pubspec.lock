@@ -111,7 +111,7 @@ packages:
     source: sdk
     version: "0.0.0"
   flutter_bluetooth_basic:
-    dependency: "direct overridden"
+    dependency: "direct main"
     description:
       path: flutter_bluetooth_basic_local
       relative: true

@@ -12,6 +12,7 @@ dependencies:
   # Using latest flutter_inappwebview
   flutter_inappwebview: ^6.1.5
   esc_pos_bluetooth: ^0.4.1
+  flutter_bluetooth_basic: any
   esc_pos_utils: ^1.1.0
   permission_handler: ^11.3.1
   shared_preferences: ^2.2.3

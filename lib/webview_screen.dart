@@ -57,17 +57,24 @@ class _WebViewScreenState extends State<WebViewScreen> {
     if (granted) {
       String? savedMac = await _bluetoothService.loadSavedPrinterMac();
       if (savedMac != null) {
-        // Automatically start scanning to find the saved printer and set it
+        // Automatically start scanning to find the saved printer and connect to it
         _bluetoothService.startScan();
-        _bluetoothService.printerManager.scanResults.listen((devices) {
+        _bluetoothService.printerManager.scanResults.listen((devices) async {
           for (var device in devices) {
             if (device.address == savedMac) {
-              _bluetoothService.setPrinter(device);
               _bluetoothService.stopScan();
+              // Cố gắng kết nối thực sự tới máy in
+              bool connected = await _bluetoothService.connectToPrinter(device);
               if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Đã tự động kết nối máy in: ${device.name}')),
-                );
+                if (connected) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Đã tự động kết nối máy in: ${device.name}')),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Không thể kết nối máy in: ${device.name}')),
+                  );
+                }
               }
               break;
             }
@@ -279,9 +286,11 @@ class _WebViewScreenState extends State<WebViewScreen> {
                                   : OutlinedButton(
                                       onPressed: () async {
                                         await _bluetoothService.savePrinter(device);
+                                        // Kết nối thực sự tới máy in
+                                        bool connected = await _bluetoothService.connectToPrinter(device);
                                         setStateSheet(() {}); // update sheet UI
                                         ScaffoldMessenger.of(this.context).showSnackBar(
-                                          SnackBar(content: Text('Đã chọn máy in: ${device.name}')),
+                                          SnackBar(content: Text(connected ? 'Đã kết nối máy in: ${device.name}' : 'Không thể kết nối máy in: ${device.name}')),
                                         );
                                         Navigator.pop(context);
                                       },
@@ -289,9 +298,11 @@ class _WebViewScreenState extends State<WebViewScreen> {
                                     ),
                                 onTap: () async {
                                   await _bluetoothService.savePrinter(device);
+                                  // Kết nối thực sự tới máy in
+                                  bool connected = await _bluetoothService.connectToPrinter(device);
                                   setStateSheet(() {}); // update sheet UI
                                   ScaffoldMessenger.of(this.context).showSnackBar(
-                                    SnackBar(content: Text('Đã chọn máy in: ${device.name}')),
+                                    SnackBar(content: Text(connected ? 'Đã kết nối máy in: ${device.name}' : 'Không thể kết nối máy in: ${device.name}')),
                                   );
                                   Navigator.pop(context);
                                 },

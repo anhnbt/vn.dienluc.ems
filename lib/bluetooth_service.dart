@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:esc_pos_bluetooth/esc_pos_bluetooth.dart';
-import 'package:esc_pos_utils/esc_pos_utils.dart';
+import 'package:flutter_bluetooth_basic/flutter_bluetooth_basic.dart';
 
 class BluetoothService {
   static final BluetoothService _instance = BluetoothService._internal();
@@ -15,6 +15,8 @@ class BluetoothService {
   BluetoothService._internal();
 
   final PrinterBluetoothManager _printerManager = PrinterBluetoothManager();
+  final BluetoothManager _bluetoothManager = BluetoothManager.instance;
+  
   PrinterBluetooth? _selectedPrinter;
   bool _isConnected = false;
 
@@ -35,7 +37,7 @@ class BluetoothService {
 
     bool allGranted = true;
     statuses.forEach((permission, status) {
-      if (!status.isGranted) {
+      if (!status.isGranted && permission != Permission.location) {
         allGranted = false;
       }
     });
@@ -73,13 +75,65 @@ class BluetoothService {
     _selectedPrinter = printer;
   }
 
+  Future<bool> connectToPrinter(PrinterBluetooth printer) async {
+    try {
+      final device = BluetoothDevice();
+      device.name = printer.name;
+      device.address = printer.address;
+      device.type = printer.type ?? 0;
+      
+      await _bluetoothManager.connect(device);
+      _isConnected = true;
+      _selectedPrinter = printer;
+      return true;
+    } catch (e) {
+      debugPrint('Connection error: $e');
+      _isConnected = false;
+      return false;
+    }
+  }
+
+  Future<void> disconnect() async {
+    try {
+      await _bluetoothManager.disconnect();
+    } catch (e) {
+      debugPrint('Disconnect error: $e');
+    } finally {
+      _isConnected = false;
+    }
+  }
+
   Future<PosPrintResult> printTicket(List<int> bytes) async {
     if (_selectedPrinter == null) {
       return PosPrintResult.printerNotSelected;
     }
     
-    _printerManager.selectPrinter(_selectedPrinter!);
-    final result = await _printerManager.printTicket(bytes);
-    return result;
+    // Nếu chưa kết nối, thử kết nối
+    if (!_isConnected) {
+      bool connected = await connectToPrinter(_selectedPrinter!);
+      if (!connected) {
+        return PosPrintResult.timeout;
+      }
+      // Chờ một chút sau khi kết nối trước khi gửi dữ liệu
+      await Future.delayed(const Duration(milliseconds: 500));
+    }
+    
+    try {
+      // Chia nhỏ dữ liệu thành các gói 256 bytes để tránh bị tràn bộ đệm máy in (gây treo)
+      int chunkSize = 256;
+      for (var i = 0; i < bytes.length; i += chunkSize) {
+        var end = (i + chunkSize < bytes.length) ? i + chunkSize : bytes.length;
+        var chunk = bytes.sublist(i, end);
+        await _bluetoothManager.writeData(chunk);
+        // Delay nhỏ giữa các gói để máy in kịp nhận
+        await Future.delayed(const Duration(milliseconds: 10));
+      }
+      
+      return PosPrintResult.success;
+    } catch (e) {
+      debugPrint('Print error: $e');
+      _isConnected = false; // Đánh dấu ngắt kết nối nếu lỗi gửi dữ liệu
+      return PosPrintResult.ticketEmpty;
+    }
   }
 }
