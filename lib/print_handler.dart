@@ -6,6 +6,10 @@ import 'package:esc_pos_bluetooth/esc_pos_bluetooth.dart';
 import 'bluetooth_service.dart';
 
 class PrintHandler {
+  final void Function(String message)? onMessage;
+
+  PrintHandler({this.onMessage});
+
   /// Handles the 'print' JavaScript channel call
   /// JS execution example: window.flutter_inappwebview.callHandler('print', base64)
   Future<void> handlePrintCall(List<dynamic> args) async {
@@ -13,7 +17,9 @@ class PrintHandler {
       final String base64Data = args[0].toString();
       await printImage(base64Data);
     } else {
-      debugPrint('Print called from JS but no base64 arguments provided.');
+      final msg = 'Lỗi JS: Không nhận được dữ liệu base64.';
+      debugPrint(msg);
+      onMessage?.call(msg);
     }
   }
 
@@ -23,7 +29,9 @@ class PrintHandler {
       final bluetoothService = BluetoothService();
       
       if (bluetoothService.selectedPrinter == null) {
-        debugPrint('Print Error: No printer selected.');
+        final msg = 'Lỗi: Bạn chưa chọn thiết bị máy in Bluetooth (Bấm icon Máy in ở trên cùng)!';
+        debugPrint(msg);
+        onMessage?.call(msg);
         return;
       }
 
@@ -40,7 +48,9 @@ class PrintHandler {
       // Decode image
       final img.Image? decodedImage = img.decodeImage(bytes);
       if (decodedImage == null) {
-        debugPrint('Print Error: Failed to decode image bytes.');
+        final msg = 'Lỗi: Không thể decode ảnh hóa đơn (Base64 sai định dạng).';
+        debugPrint(msg);
+        onMessage?.call(msg);
         return;
       }
       
@@ -70,13 +80,19 @@ class PrintHandler {
       final PosPrintResult result = await bluetoothService.printTicket(printBytes);
       
       if (result != PosPrintResult.success) {
-        debugPrint('Print Error: ${result.msg}');
+        final msg = 'Lỗi in ấn: ${result.msg}';
+        debugPrint(msg);
+        onMessage?.call(msg);
       } else {
-        debugPrint('Print Success!');
+        final msg = 'Đã đẩy lệnh in thành công!';
+        debugPrint(msg);
+        onMessage?.call(msg);
       }
 
     } catch (e) {
-      debugPrint('Error during print process: $e');
+      final msg = 'Lỗi tiến trình in: $e';
+      debugPrint(msg);
+      onMessage?.call(msg);
     }
   }
 }

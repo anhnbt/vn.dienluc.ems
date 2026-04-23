@@ -16,7 +16,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
   final String targetUrl = "https://ems.dienluc.vn/";
 
   InAppWebViewController? webViewController;
-  final PrintHandler _printHandler = PrintHandler();
+  late final PrintHandler _printHandler;
   final BluetoothService _bluetoothService = BluetoothService();
 
   double progress = 0;
@@ -27,6 +27,19 @@ class _WebViewScreenState extends State<WebViewScreen> {
   @override
   void initState() {
     super.initState();
+    _printHandler = PrintHandler(
+      onMessage: (msg) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(msg),
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
+      },
+    );
+
     settings = InAppWebViewSettings(
       javaScriptEnabled: true,
       domStorageEnabled: true,
@@ -167,8 +180,10 @@ class _WebViewScreenState extends State<WebViewScreen> {
   }
 
   void _showPrinterSelectionDialog() {
+    _bluetoothService.startScan();
     showModalBottomSheet(
       context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
       builder: (context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setStateSheet) {
@@ -177,12 +192,29 @@ class _WebViewScreenState extends State<WebViewScreen> {
                 AppBar(
                   title: const Text('Chọn máy in Bluetooth'),
                   automaticallyImplyLeading: false,
+                  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
                   actions: [
-                    IconButton(
-                      icon: const Icon(Icons.refresh),
-                      onPressed: () {
-                        _bluetoothService.startScan();
-                      },
+                    StreamBuilder<bool>(
+                      stream: _bluetoothService.printerManager.isScanningStream,
+                      initialData: false,
+                      builder: (c, snapshot) {
+                        if (snapshot.data == true) {
+                          return const Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.blue),
+                            ),
+                          );
+                        }
+                        return IconButton(
+                          icon: const Icon(Icons.refresh),
+                          onPressed: () {
+                            _bluetoothService.startScan();
+                          },
+                        );
+                      }
                     ),
                   ],
                 ),
@@ -192,26 +224,78 @@ class _WebViewScreenState extends State<WebViewScreen> {
                     initialData: const [],
                     builder: (context, snapshot) {
                       final devices = snapshot.data ?? [];
-                      if (devices.isEmpty) {
-                        return const Center(child: Text('Đang quét hoặc không tìm thấy máy in...'));
-                      }
-                      return ListView.builder(
-                        itemCount: devices.length,
-                        itemBuilder: (context, index) {
-                          final device = devices[index];
-                          final isSelected = _bluetoothService.selectedPrinter?.address == device.address;
-                          return ListTile(
-                            leading: const Icon(Icons.print),
-                            title: Text(device.name ?? 'Unknown'),
-                            subtitle: Text(device.address ?? ''),
-                            trailing: isSelected ? const Icon(Icons.check, color: Colors.green) : null,
-                            onTap: () async {
-                              await _bluetoothService.savePrinter(device);
-                              setStateSheet(() {}); // update sheet UI
-                              ScaffoldMessenger.of(this.context).showSnackBar(
-                                SnackBar(content: Text('Đã chọn máy in: ${device.name}')),
+                      
+                      return StreamBuilder<bool>(
+                        stream: _bluetoothService.printerManager.isScanningStream,
+                        initialData: false,
+                        builder: (c, scanSnapshot) {
+                          final isScanning = scanSnapshot.data ?? false;
+                          
+                          if (devices.isEmpty) {
+                            if (isScanning) {
+                              return Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const CircularProgressIndicator(),
+                                    const SizedBox(height: 16),
+                                    const Text('Đang quét tìm máy in lân cận...', style: TextStyle(color: Colors.grey)),
+                                  ],
+                                ),
                               );
-                              Navigator.pop(context);
+                            } else {
+                              return Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.bluetooth_disabled, size: 60, color: Colors.grey),
+                                    const SizedBox(height: 16),
+                                    const Text('Không tìm thấy thiết bị nào!', style: TextStyle(color: Colors.grey)),
+                                    const SizedBox(height: 8),
+                                    TextButton.icon(
+                                      icon: const Icon(Icons.refresh),
+                                      label: const Text('Quét lại'),
+                                      onPressed: () => _bluetoothService.startScan(),
+                                    )
+                                  ],
+                                ),
+                              );
+                            }
+                          }
+                          
+                          return ListView.separated(
+                            itemCount: devices.length,
+                            separatorBuilder: (context, index) => const Divider(height: 1),
+                            itemBuilder: (context, index) {
+                              final device = devices[index];
+                              final isSelected = _bluetoothService.selectedPrinter?.address == device.address;
+                              return ListTile(
+                                leading: Icon(Icons.print, color: isSelected ? Colors.blue : Colors.grey),
+                                title: Text(device.name ?? 'Thiết bị không tên', 
+                                    style: TextStyle(fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+                                subtitle: Text(device.address ?? ''),
+                                trailing: isSelected 
+                                  ? const Icon(Icons.check_circle, color: Colors.green) 
+                                  : OutlinedButton(
+                                      onPressed: () async {
+                                        await _bluetoothService.savePrinter(device);
+                                        setStateSheet(() {}); // update sheet UI
+                                        ScaffoldMessenger.of(this.context).showSnackBar(
+                                          SnackBar(content: Text('Đã chọn máy in: ${device.name}')),
+                                        );
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text('Kết nối'),
+                                    ),
+                                onTap: () async {
+                                  await _bluetoothService.savePrinter(device);
+                                  setStateSheet(() {}); // update sheet UI
+                                  ScaffoldMessenger.of(this.context).showSnackBar(
+                                    SnackBar(content: Text('Đã chọn máy in: ${device.name}')),
+                                  );
+                                  Navigator.pop(context);
+                                },
+                              );
                             },
                           );
                         },

@@ -1,4 +1,4 @@
-package com.example.ems_webview
+package vn.dienluc.ems
 
 import io.flutter.embedding.android.FlutterActivity
 

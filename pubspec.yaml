@@ -15,7 +15,7 @@ dependencies:
   esc_pos_utils: ^1.1.0
   permission_handler: ^11.3.1
   shared_preferences: ^2.2.3
-  image: ^4.1.7
+  image: ^3.3.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -23,3 +23,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+dependency_overrides:
+  flutter_bluetooth_basic:
+    path: ./flutter_bluetooth_basic_local
