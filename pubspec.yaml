@@ -11,7 +11,11 @@ dependencies:
     sdk: flutter
   # Using latest flutter_inappwebview
   flutter_inappwebview: ^6.1.5
-
+  esc_pos_bluetooth: ^0.4.1
+  esc_pos_utils: ^1.1.0
+  permission_handler: ^11.3.1
+  shared_preferences: ^2.2.3
+  image: ^4.1.7
 dev_dependencies:
   flutter_test:
     sdk: flutter
