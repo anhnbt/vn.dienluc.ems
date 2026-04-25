@@ -11,9 +11,9 @@
     <!-- Required for Bluetooth scanning on Android -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <application
-        android:label="EMS Dien Luc"
+        android:label="Điện Lực JSC"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/launcher_icon"
         android:usesCleartextTraffic="true"
         android:hardwareAccelerated="true">
         <activity
