@@ -116,10 +116,15 @@ class _WebViewScreenState extends State<WebViewScreen> {
               onWebViewCreated: (controller) {
                 webViewController = controller;
 
-                // Setup JavaScript Bridge to register "print" handler
+                // Setup JavaScript Bridge to register "print" handlers
                 controller.addJavaScriptHandler(
                   handlerName: 'print',
                   callback: _printHandler.handlePrintCall,
+                );
+                
+                controller.addJavaScriptHandler(
+                  handlerName: 'printNativeESC',
+                  callback: _printHandler.handlePrintNativeCall,
                 );
               },
               onLoadStart: (controller, url) {
