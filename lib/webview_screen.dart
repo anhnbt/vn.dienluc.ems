@@ -77,8 +77,13 @@ class _WebViewScreenState extends State<WebViewScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('EMS Dien Luc',
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Row(
+          children: [
+            Image.asset('logo.png', height: 28),
+            const SizedBox(width: 10),
+            const Text('Điện Lực JSC', style: TextStyle(fontWeight: FontWeight.bold)),
+          ],
+        ),
         elevation: 2,
         actions: [
           IconButton(
