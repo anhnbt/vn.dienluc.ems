@@ -30,12 +30,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
     _printHandler = PrintHandler(
       onMessage: (msg) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(msg),
-              duration: const Duration(seconds: 4),
-            ),
-          );
+          _showSnackBar(msg);
         }
       },
     );
@@ -66,15 +61,9 @@ class _WebViewScreenState extends State<WebViewScreen> {
               // Cố gắng kết nối thực sự tới máy in
               bool connected = await _bluetoothService.connectToPrinter(device);
               if (mounted) {
-                if (connected) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Đã tự động kết nối máy in: ${device.name}')),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Không thể kết nối máy in: ${device.name}')),
-                  );
-                }
+                _showSnackBar(connected 
+                  ? 'Đã tự động kết nối máy in: ${device.name}' 
+                  : 'Không thể kết nối máy in: ${device.name}');
               }
               break;
             }
@@ -88,8 +77,13 @@ class _WebViewScreenState extends State<WebViewScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('EMS Dien Luc',
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Row(
+          children: [
+            Image.asset('logo.png', height: 28),
+            const SizedBox(width: 10),
+            const Text('Điện Lực JSC', style: TextStyle(fontWeight: FontWeight.bold)),
+          ],
+        ),
         elevation: 2,
         actions: [
           IconButton(
@@ -116,10 +110,15 @@ class _WebViewScreenState extends State<WebViewScreen> {
               onWebViewCreated: (controller) {
                 webViewController = controller;
 
-                // Setup JavaScript Bridge to register "print" handler
+                // Setup JavaScript Bridge to register "print" handlers
                 controller.addJavaScriptHandler(
                   handlerName: 'print',
                   callback: _printHandler.handlePrintCall,
+                );
+                
+                controller.addJavaScriptHandler(
+                  handlerName: 'printNativeESC',
+                  callback: _printHandler.handlePrintNativeCall,
                 );
               },
               onLoadStart: (controller, url) {
@@ -152,9 +151,31 @@ class _WebViewScreenState extends State<WebViewScreen> {
               },
             ),
 
-          // Loading Progress Bar
+          // Cải tiến UX: Hiển thị màn hình chờ toàn màn hình khi đang tải dữ liệu
           if (progress < 1.0 && !isError)
-            LinearProgressIndicator(value: progress),
+            Container(
+              color: Colors.white,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                      strokeWidth: 3,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Đang tải dữ liệu... ${(progress * 100).toInt()}%',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.blueGrey,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
 
           // Error State Screen
           if (isError)
@@ -187,7 +208,13 @@ class _WebViewScreenState extends State<WebViewScreen> {
   }
 
   void _showPrinterSelectionDialog() {
-    _bluetoothService.startScan();
+    try {
+      _bluetoothService.startScan();
+    } catch (e) {
+      debugPrint("Error starting scan: $e");
+      _showSnackBar("Không thể bắt đầu quét: $e");
+    }
+    
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
@@ -289,9 +316,9 @@ class _WebViewScreenState extends State<WebViewScreen> {
                                         // Kết nối thực sự tới máy in
                                         bool connected = await _bluetoothService.connectToPrinter(device);
                                         setStateSheet(() {}); // update sheet UI
-                                        ScaffoldMessenger.of(this.context).showSnackBar(
-                                          SnackBar(content: Text(connected ? 'Đã kết nối máy in: ${device.name}' : 'Không thể kết nối máy in: ${device.name}')),
-                                        );
+                                        _showSnackBar(connected 
+                                          ? 'Đã kết nối máy in: ${device.name}' 
+                                          : 'Không thể kết nối máy in: ${device.name}');
                                         Navigator.pop(context);
                                       },
                                       child: const Text('Kết nối'),
@@ -301,9 +328,9 @@ class _WebViewScreenState extends State<WebViewScreen> {
                                   // Kết nối thực sự tới máy in
                                   bool connected = await _bluetoothService.connectToPrinter(device);
                                   setStateSheet(() {}); // update sheet UI
-                                  ScaffoldMessenger.of(this.context).showSnackBar(
-                                    SnackBar(content: Text(connected ? 'Đã kết nối máy in: ${device.name}' : 'Không thể kết nối máy in: ${device.name}')),
-                                  );
+                                  _showSnackBar(connected 
+                                    ? 'Đã kết nối máy in: ${device.name}' 
+                                    : 'Không thể kết nối máy in: ${device.name}');
                                   Navigator.pop(context);
                                 },
                               );
@@ -322,5 +349,20 @@ class _WebViewScreenState extends State<WebViewScreen> {
     ).whenComplete(() {
       _bluetoothService.stopScan();
     });
+  }
+
+  void _showSnackBar(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.only(bottom: 80, left: 16, right: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 }

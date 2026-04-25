@@ -28,12 +28,17 @@ class BluetoothService {
   bool get isConnected => _isConnected;
 
   Future<bool> requestPermissions() async {
-    Map<Permission, PermissionStatus> statuses = await [
+    List<Permission> permissions = [
       Permission.bluetooth,
       Permission.bluetoothScan,
       Permission.bluetoothConnect,
-      Permission.location,
-    ].request();
+    ];
+
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      permissions.add(Permission.location);
+    }
+
+    Map<Permission, PermissionStatus> statuses = await permissions.request();
 
     bool allGranted = true;
     statuses.forEach((permission, status) {
@@ -46,7 +51,11 @@ class BluetoothService {
   }
 
   void startScan() {
-    _printerManager.startScan(const Duration(seconds: 4));
+    try {
+      _printerManager.startScan(const Duration(seconds: 4));
+    } catch (e) {
+      debugPrint('Start scan error: $e');
+    }
   }
 
   void stopScan() {
