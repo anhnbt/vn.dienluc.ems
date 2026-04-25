@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:image/image.dart';
 
 void main() {
-  final file = File('logo.png');
+  final file = File('icon-2048.png');
   final image = decodePng(file.readAsBytesSync());
   if (image == null) return;
   final background = Image(image.width, image.height);
