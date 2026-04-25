@@ -157,9 +157,31 @@ class _WebViewScreenState extends State<WebViewScreen> {
               },
             ),
 
-          // Loading Progress Bar
+          // Cải tiến UX: Hiển thị màn hình chờ toàn màn hình khi đang tải dữ liệu
           if (progress < 1.0 && !isError)
-            LinearProgressIndicator(value: progress),
+            Container(
+              color: Colors.white,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                      strokeWidth: 3,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Đang tải dữ liệu... ${(progress * 100).toInt()}%',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.blueGrey,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
 
           // Error State Screen
           if (isError)
