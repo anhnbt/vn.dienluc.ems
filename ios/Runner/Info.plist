@@ -26,6 +26,14 @@
 		<string>$(FLUTTER_BUILD_NUMBER)</string>
 		<key>LSRequiresIPhoneOS</key>
 		<true/>
+		<key>NSBluetoothAlwaysUsageDescription</key>
+		<string>Ứng dụng cần quyền Bluetooth để quét và kết nối với máy in hoá đơn.</string>
+		<key>NSBluetoothPeripheralUsageDescription</key>
+		<string>Ứng dụng cần quyền Bluetooth để quét và kết nối với máy in hoá đơn.</string>
+		<key>UIBackgroundModes</key>
+		<array>
+			<string>bluetooth-central</string>
+		</array>
 		<key>UIApplicationSceneManifest</key>
 		<dict>
 			<key>UIApplicationSupportsMultipleScenes</key>
@@ -53,6 +61,8 @@
 		<string>LaunchScreen</string>
 		<key>UIMainStoryboardFile</key>
 		<string>Main</string>
+		<key>UIStatusBarHidden</key>
+		<false/>
 		<key>UISupportedInterfaceOrientations</key>
 		<array>
 			<string>UIInterfaceOrientationPortrait</string>
@@ -66,11 +76,5 @@
 			<string>UIInterfaceOrientationLandscapeLeft</string>
 			<string>UIInterfaceOrientationLandscapeRight</string>
 		</array>
-		<key>UIStatusBarHidden</key>
-		<false/>
-		<key>NSBluetoothAlwaysUsageDescription</key>
-		<string>Ứng dụng cần quyền Bluetooth để quét và kết nối với máy in hoá đơn.</string>
-		<key>NSBluetoothPeripheralUsageDescription</key>
-		<string>Ứng dụng cần quyền Bluetooth để quét và kết nối với máy in hoá đơn.</string>
 	</dict>
 </plist>

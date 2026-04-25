@@ -208,7 +208,13 @@ class _WebViewScreenState extends State<WebViewScreen> {
   }
 
   void _showPrinterSelectionDialog() {
-    _bluetoothService.startScan();
+    try {
+      _bluetoothService.startScan();
+    } catch (e) {
+      debugPrint("Error starting scan: $e");
+      _showSnackBar("Không thể bắt đầu quét: $e");
+    }
+    
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
